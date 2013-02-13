@@ -17,51 +17,49 @@ import kirb and instantiate a Watcher:
 path = '.'
 watcher = kirb.Watcher(path)
 
-Watchers can specify FileSets, a group of files to watch for changes.
-A FileSet must specify an output file and list a files to monitor:
-watcher.FileSet('styles.css', ['css/a.css', 'css/b.css'])
+Watchers can specify File Sets, a group of files to watch for changes.
+A File Set must specify an output file and list a files to monitor:
+watcher.add_file_set('styles.css', ['css/a.css', 'css/b.css'])
 
 To start monitoring for file changes, call:
 watcher.start()
 After the watcher is started, all modes will also have an the callback:
 onchange(changed_files_path) <bool> (see below)
 
-To immediately apply the operations and callbacks to all FileSets without
+To immediately apply the operations and callbacks to all File Sets without
 waiting for a file to change:
 watcher.compile()
 
 
 # Mirrored Builds
-FileSets can used to create MirrorSets. MirrorSets are useful for building 
+File Sets can used to create Mirror Sets. Mirror Sets are useful for building 
 variations of the main file set, i.e. for themes or customer specific builds
-MirrorSets assume that there is an identical tree structure to the file set,
+Mirror Sets assume that there is an identical tree structure to the file set,
 with files that may be overriden in the mirror directory.
 For example:
-my_project.MirrorSet('styles.css', 'customerA')
+my_project.add_mirror_set('styles.css', 'customerA')
 Now we are watching 'customerA/css/a.css' and 'customerA/css/b.css' (if they
-exist), and if not we are continuing to watch the original FileSet files (with
-original order preserved). Output for the MirrorSet wil be written to
-'customerA/styles.css'. MirrorSet may also be passed an optional third argument,
-a list or MirrorSet only files to watch.
+exist), and if not we are continuing to watch the original File Set files (with
+original order preserved). Output for the Mirror Set wil be written to
+'customerA/styles.css'. Mirror Set may also be passed an optional third argument,
+a list or Mirror Set only files to watch.
 
 
 # Modes and Callbacks
-A FileSet can be passed a third argument, a dict containing configuration and
+A File Set can be passed a third argument, a dict containing configuration and
 callbacks for various build stages:
-watcher.FileSet(out, js_paths, {'mode' : 'concat', 'onchange': js_lint})
+watcher.add_file_set(out, js_paths, {'mode' : 'concat', 'onchange': js_lint})
 
 Modes:
 * concat (default):
-  This mode reads the files in the FileSet line by line and writes them to the
-  FileSet's out.
+  This mode reads the files in the File Set line by line and writes them to the
+  File Set's out.
   Callbacks:
-    * each([out, files]) <list or bool>:
+    * each([out, files]) <list>:
       Return a list to modify the files used for concatenation
         This could be used when watching SCSS files to generate CSS if none is
         present (assume onchange callback already compiled the modified SCSS
         file), then return a list of css paths.
-      Return True to continue concatenation with original file list
-      Return False to terminate before concatenation
     * line(str) <str>:
       Called during concatenation with line of original file
       Return value is written to concatenated final

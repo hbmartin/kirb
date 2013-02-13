@@ -16,11 +16,11 @@ js_mobile_paths = ['skins/mobile/js/test.js']
 
 watcher = kirb.Watcher('.')
 
-watcher.FileSet('styles.css', css_paths)
-watcher.MirrorSet('styles.css', 'skins/mobile')
+watcher.add_file_set('styles.css', css_paths)
+watcher.add_mirror_set('styles.css', 'skins/mobile')
 
-watcher.FileSet('app.js', js_paths, {'onchange': js_lint})
-watcher.MirrorSet('app.js', 'skins/mobile', js_mobile_paths)
+watcher.add_file_set('app.js', js_paths, {'onchange': js_lint})
+watcher.add_mirror_set('app.js', 'skins/mobile', js_mobile_paths)
 
 watcher.compile()
 print "Static compile finished"
