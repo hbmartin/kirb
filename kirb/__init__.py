@@ -29,8 +29,12 @@ class Watcher(object):
         if 'mode' in callbacks and callbacks['mode'] is 'slurp':
             slurpy = []
             for filename in files:
-                with open(filename) as infile:
-                    slurpy.append([filename, infile.read()])
+                try:
+                    with open(filename) as infile:
+                        slurpy.append([filename, infile.read()])
+                except IOError:
+                    info('IOError on ' + filename + ', maybe the file doesnt exist')
+                    pass
             if 'each' in callbacks:
                 callbacks['each'](out, slurpy)
             else:
@@ -46,9 +50,13 @@ class Watcher(object):
                 return
             with open(out, 'w') as outfile:
                 for filename in files:
-                    with open(filename) as infile:
-                        for line in infile:
-                            outfile.write(line if not 'line' in callbacks else callbacks['line'](line))
+                    try:
+                        with open(filename) as infile:
+                            for line in infile:
+                                outfile.write(line if not 'line' in callbacks else callbacks['line'](line))
+                    except IOError:
+                        info('IOError on ' + filename + ', maybe the file doesnt exist')
+                        pass
             info("Wrote file: " + out)
             if 'post' in callbacks:
                 callbacks['post'](out)
@@ -81,7 +89,7 @@ class Watcher(object):
             if (path.exists(filePath)):
                 # is lineline substution while looping acceptable?
                 files[i] = path.join(new, files[i])
-        if addl is not None and type(addl) is list:
+        if addl is not None:
             files.extend(addl)
         self.file_set[out] = {'files' : files, 'callbacks' : self.file_set[orig]['callbacks']}
     
