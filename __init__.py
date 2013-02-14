@@ -70,11 +70,8 @@ class Watcher(object):
         return out
     
     def add_mirror_set(self, orig, new, addl = None):
-        if type(orig) is not str:
-            raise TypeError('orig list is a required  argument')
-        if type(new) is not str:
-            raise TypeError('new is a required argument')
-        
+        if not orig in self.file_set:
+            raise Exception('first parameter must refer to output used by add_file_set')
         files = copy.deepcopy(self.file_set[orig]['files'])
         skin_path = os.path.join(self.root, new)
         out = os.path.join(skin_path, orig)
