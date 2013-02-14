@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 
-import sys, time, os
+from sys import argv
+from os import path
+from time import sleep
 import kirb
 
 def js_lint(file):
     from subprocess import call
-    jshint = os.path.abspath("./buildtools/node_modules/jshint/bin/hint")
+    jshint = path.abspath("./buildtools/node_modules/jshint/bin/hint")
     call([jshint, "--config", "buildtools/jshint.json", file])
     return True
 
-args = sys.argv[1:]
+args = argv[1:]
 css_paths = ['css/ui-core.css','css/ui.css']
 js_paths = ['js/raphael.js','js/jquery/validate.js','js/myApp.js']
 js_mobile_paths = ['skins/mobile/js/test.js']
@@ -30,7 +32,7 @@ if not '-c' in args:
     watcher.start()
     try:
         while True:
-            time.sleep(1)
+            sleep(1)
     except KeyboardInterrupt:
         watcher.stop()
     
