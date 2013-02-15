@@ -15,14 +15,16 @@ class ChangeHandler(FileSystemEventHandler):
 class Watcher(object):
     def _on_file_changed(self, src_path):
         src_path = path.relpath(src_path)
+        # prevent onchange handler from being repeatedly fired by mirrors
+        used_onchanges = []
         for out, props in self.file_set.iteritems():
             files = props['files']
             callbacks = props['callbacks']
             if src_path in files:
-                if callbacks['onchange']:
+                if 'onchange' in callbacks and not callbacks['onchange'].__name__ in used_onchanges:
                     if not callbacks['onchange'](path.abspath(src_path)):
                         raise Exception('onchange callback errored for file ' + src_path)
-                print path.abspath(out)
+                    used_onchanges.append(callbacks['onchange'].__name__)
                 self._compile(files, callbacks, path.abspath(out))
                 
     def _compile(self, files, callbacks, out):
