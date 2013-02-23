@@ -2,20 +2,16 @@ from logging import info
 from copy import deepcopy
 from os import path
 
-try :
-    from watchdog.observers import Observer
-    from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 
-    class ChangeHandler(FileSystemEventHandler):
-        def __init__(self, callback):
-            self.callback = callback
-        def on_modified(self, event):
-            if not event.is_directory and event.event_type == "modified":
-                self.callback(event.src_path)
-except:
-    info('watchdog not available, cannot perform live build')
-    pass
+class ChangeHandler(FileSystemEventHandler):
+    def __init__(self, callback):
+        self.callback = callback
+    def on_modified(self, event):
+        if not event.is_directory and event.event_type == "modified":
+            self.callback(event.src_path)
 
 class Watcher(object):
     def _on_file_changed(self, src_path):
@@ -94,28 +90,28 @@ class Watcher(object):
         files = deepcopy(self.file_set[orig]['files'])
         skin_path = path.join(self.root, new)
         out = path.join(skin_path, orig)
+        callbacks = deepcopy(self.file_set[orig]['callbacks'])
         for i, filename in enumerate(files):
+            if 'prefix_chomp' in callbacks:
+                if filename.split('/')[0] == callbacks['prefix_chomp']:
+                    filename = filename[(len(callbacks['prefix_chomp'])+1):]
             filePath = path.join(skin_path, filename)
             if (path.exists(filePath)):
                 # is lineline substution while looping acceptable?
                 files[i] = path.relpath(filePath, self.root)
         if addl is not None:
             files.extend(addl)
-        callbacks = deepcopy(self.file_set[orig]['callbacks'])
         callbacks['no_out'] = False
         self.file_set[out] = {'files' : files, 'callbacks' : callbacks}
     
-    try:
-        def stop(self):
-            self.observer.stop()
+    def stop(self):
+        self.observer.stop()
     
-        def start(self):
-            event_handler = ChangeHandler(self._on_file_changed)
-            self.observer = Observer()
-            self.observer.schedule(event_handler, self.root, recursive=True)
-            self.observer.start()
-    except:
-        pass
+    def start(self):
+        event_handler = ChangeHandler(self._on_file_changed)
+        self.observer = Observer()
+        self.observer.schedule(event_handler, self.root, recursive=True)
+        self.observer.start()
     
     def __init__(self, root):
         self.root = path.abspath(root)
