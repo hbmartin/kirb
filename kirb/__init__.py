@@ -13,17 +13,19 @@ class ChangeHandler(FileSystemEventHandler):
         if not event.is_directory and event.event_type == "modified":
             self.callback(event.src_path)
 
+
 class Watcher(object):
     def _on_file_changed(self, src_path):
         src_path = path.relpath(src_path, self.root)
         # prevent onchange handler from being repeatedly fired by mirrors
         used_onchanges = []
-        for out, props in self.file_set.iteritems():
+        for out in self.outputs:
+            props = self.file_set[out]
             files = props['files']
             callbacks = props['callbacks']
             if src_path in files:
                 if 'onchange' in callbacks and not callbacks['onchange'].__name__ in used_onchanges:
-                    if not callbacks['onchange'](path.abspath(src_path)):
+                    if not callbacks['onchange'](path.abspath(path.join(self.root, src_path))):
                         raise Exception('onchange callback errored for file ' + src_path)
                     used_onchanges.append(callbacks['onchange'].__name__)
                 self._compile(files, callbacks, path.abspath(out))
@@ -67,7 +69,8 @@ class Watcher(object):
                 callbacks['post'](out)
     
     def compile(self):
-        for out, props in self.file_set.iteritems():
+        for out in self.outputs:
+            props = self.file_set[out]
             files = props['files']
             callbacks = props['callbacks']
             if not 'no_out' in callbacks or not callbacks['no_out']:
@@ -78,6 +81,7 @@ class Watcher(object):
             raise Exception('out file is already in use by another FileSet')
         if out in files:
             raise Exception('cannot watch out file')
+        self.outputs.append(out)
         self.file_set[out] = {'files' : files, 'callbacks' : callbacks}
         return out
     
@@ -102,6 +106,7 @@ class Watcher(object):
         if addl is not None:
             files.extend(addl)
         callbacks['no_out'] = False
+        self.outputs.append(out)
         self.file_set[out] = {'files' : files, 'callbacks' : callbacks}
     
     def stop(self):
@@ -116,4 +121,5 @@ class Watcher(object):
     def __init__(self, root):
         self.root = path.abspath(root)
         self.file_set = {}
+        self.outputs = []
 

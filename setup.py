@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 NAME='kirb'
 setup(name=NAME,
-      version='1.6',
+      version='1.6.2',
       license='BSD',
       url='https://github.com/hbmartin/kirb',
       description='Continuous Integration & ReBuild',
