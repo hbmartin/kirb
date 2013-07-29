@@ -127,3 +127,8 @@ In addition to mode, add_file_set can also be passed the options:
 * prefix_chomp
   This prefix will be removed from any files in the File Set when identifying
   files to be overwritten in a Mirror Set.
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/hbmartin/kirb/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
